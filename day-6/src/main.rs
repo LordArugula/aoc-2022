@@ -6,18 +6,35 @@ fn main() {
 
     let chars = input.chars().collect::<Vec<char>>();
 
-    for i in 0..chars.len() {
-        let slice = chars.iter().skip(i).take(4);
-        if is_start_of_packet_marker(slice.clone()) {
-            println!("{}", i + 4);
-            break;
-        }
-    }
+    part_one(chars.clone());
+    part_two(chars.clone());
 }
 
-fn is_start_of_packet_marker<'a, I>(sequence: I) -> bool
+fn part_one(chars: Vec<char>) {
+    let marker_size = 4;
+    let start_of_packet_marker = start_of_marker(chars, marker_size).unwrap();
+    println!("{}", start_of_packet_marker + marker_size);
+}
+
+fn part_two(chars: Vec<char>) {
+    let marker_size = 14;
+    let start_of_message_marker = start_of_marker(chars, marker_size).unwrap();
+    println!("{}", start_of_message_marker + marker_size);
+}
+
+fn start_of_marker(chars: Vec<char>, marker_size: usize) -> Option<usize> {
+    for i in 0..chars.len() {
+        let slice = chars.iter().skip(i).take(marker_size);
+        if is_marker(slice, marker_size) {
+            return Option::Some(i);
+        }
+    }
+    return Option::None;
+}
+
+fn is_marker<'a, I>(sequence: I, marker_size: usize) -> bool
 where
     I: Iterator<Item = &'a char>,
 {
-    return sequence.collect::<HashSet<&char>>().len() == 4;
+    return sequence.collect::<HashSet<&char>>().len() == marker_size;
 }
