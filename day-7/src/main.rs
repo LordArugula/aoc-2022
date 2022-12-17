@@ -37,10 +37,11 @@ impl Dir {
 }
 
 fn main() {
-    let input = fs::read_to_string("input.txt").expect("Should be able to read the input file.");
+    let input = fs::read_to_string("input.txt")
+        .expect("Should be able to read the input file.");
 
     let tree = build_dir_tree(input);
-    //part_one(&tree);
+    part_one(&tree);
     part_two(&tree);
 }
 
