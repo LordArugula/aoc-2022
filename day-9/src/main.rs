@@ -15,28 +15,46 @@ fn main() {
             _ => (0, 0),
         });
 
-    part_one(movements);
+    let num_knots_part_one = 2;
+    count_positions_walked_by_tail_knot(movements.clone(), num_knots_part_one);
+
+    let num_knots_part_two = 10;
+    count_positions_walked_by_tail_knot(movements, num_knots_part_two);
 }
 
-fn part_one<I>(movements: I)
+fn count_positions_walked_by_tail_knot<I>(movements: I, num_knots: usize)
 where
     I: Iterator<Item = (i32, i32)>,
 {
-    let mut walked_positions = HashSet::new();
-    let (mut head_x, mut head_y) = (0, 0);
-    let (mut tail_x, mut tail_y) = (0, 0);
-    walked_positions.insert((tail_x, tail_y));
-    movements.for_each(|(x, y)| {
+    let mut walked_positions = HashSet::<(i32, i32)>::new();
+    let mut knots = (0..num_knots)
+        .map(|_| (0, 0))
+        .collect::<Vec<(i32, i32)>>();
+
+    walked_positions.insert((0, 0));
+
+    for (x, y) in movements {
         let steps = if x.abs() > y.abs() { x.abs() } else { y.abs() };
         for _ in 0..steps {
-            (head_x, head_y) = (head_x + x.signum(), head_y + y.signum());
+            let (mut knot_prev_x, mut knot_prev_y) = knots[0];
+            (knot_prev_x, knot_prev_y) = (knot_prev_x + x.signum(), knot_prev_y + y.signum());
+            knots[0] = (knot_prev_x, knot_prev_y);
 
-            let (dx, dy) = (head_x - tail_x, head_y - tail_y);
-            if dx * dx + dy * dy > 2 {
-                (tail_x, tail_y) = (tail_x + dx.signum(), tail_y + dy.signum());
-                walked_positions.insert((tail_x, tail_y));
+            for i in 1..num_knots {
+                let (mut knot_x, mut knot_y) = knots[i];
+                let (dx, dy) = (knot_prev_x - knot_x, knot_prev_y - knot_y);
+
+                if dx * dx + dy * dy > 2 {
+                    (knot_x, knot_y) = (knot_x + dx.signum(), knot_y + dy.signum());
+                    knots[i] = (knot_x, knot_y);
+                    if i == num_knots - 1 {
+                        walked_positions.insert((knot_x, knot_y));
+                    }
+                }
+                (knot_prev_x, knot_prev_y) = (knot_x, knot_y);
             }
         }
-    });
+    }
+
     println!("{}", walked_positions.len());
 }
