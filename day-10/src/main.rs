@@ -12,11 +12,15 @@ fn main() {
             total_signal_strength += calc_signal_strength(cycle_number, value);
         }
 
+        print_pixel(cycle_number, value);
+
         match line.split(" ").last().unwrap().parse::<i32>() {
             Ok(x) => {
                 if tick_cycle_number(&mut cycle_number) {
                     total_signal_strength += calc_signal_strength(cycle_number, value);
                 }
+
+                print_pixel(cycle_number, value);
 
                 value += x;
             }
@@ -35,3 +39,33 @@ fn tick_cycle_number(cycle_number: &mut i32) -> bool {
     *cycle_number += 1;
     return (*cycle_number + 20) % 40 == 0;
 }
+
+fn print_pixel(cycle_number: i32, value: i32) {
+    if value <= (cycle_number % 40) && value + 2 >= (cycle_number % 40) {
+        print!("#");
+    } else {
+        print!(".");
+    }
+
+    if cycle_number % 40 == 0 {
+        println!();
+    }
+}
+
+/*
+########.###..####.##....##..##.#..##...
+..####......####...#.......####.####....
+.....##...##..###..###.......##.####.##.
+##..##......####......######....#####..#
+....##...##.####......####......####...#
+###.##...###..##...##.....##...##.#.....
+*/
+
+/*
+##..##..#..##...##.##..##..##..##..##..#
+###..####..###...###...####..####..###..
+##.....#####...###.....####.....##.....#
+####.....##.#......#####.....####.......
+###.##.....##.###......######......##.#.
+###.##.......####.#........########.....
+*/
