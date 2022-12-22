@@ -1,4 +1,3 @@
-// use priority_queue::PriorityQueue;
 use std::{collections::{HashMap, VecDeque}, fs};
 
 fn main() {
