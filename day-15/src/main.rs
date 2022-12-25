@@ -5,14 +5,19 @@ struct Sensor {
     beacon: (i32, i32),
     manhattan_distance: i32,
 }
+
 impl Sensor {
     fn new(position: (i32, i32), beacon: (i32, i32)) -> Self {
         Self {
             position,
             beacon,
-            manhattan_distance: (beacon.1 - position.1).abs() + (beacon.0 - position.0).abs(),
+            manhattan_distance: manhattan_distance(position, beacon),
         }
     }
+}
+
+fn manhattan_distance(a: (i32, i32), b: (i32, i32)) -> i32 {
+    (a.0 - b.0).abs() + (a.1 - b.1).abs()
 }
 
 fn main() {
@@ -38,13 +43,13 @@ fn main() {
         Sensor::new(sensor, beacon)
     });
 
-
-    let (sensor_positions, beacon_positions): (HashSet<(i32, i32)>, HashSet<(i32, i32)>) = sensors
+    let beacon_positions = sensors
         .clone()
-        .map(|sensor| (sensor.position, sensor.beacon))
-        .unzip();
-
-    part_one(sensors, beacon_positions);
+        .map(|sensor| sensor.beacon)
+        .collect::<HashSet<(i32, i32)>>();
+    
+    part_one(sensors.clone(), beacon_positions);
+    part_two(sensors);
 }
 
 fn part_one<I>(sensors: I, beacon_positions: HashSet<(i32, i32)>)
@@ -78,4 +83,43 @@ where
         }
     }
     println!("{}", empty_positions.len());
+}
+
+fn part_two<I>(sensors: I)
+where
+    I: Iterator<Item = Sensor> + Clone,
+{
+    let width = 4_000_000;
+    let height = 4_000_000;
+
+    let mut y = 0;
+    while y < height {
+        let mut x = 0;
+        while x < width {
+            let mut within_sensors = false;
+            for sensor in sensors.clone() {
+                let distance = manhattan_distance(sensor.position, (x, y));
+                if distance <= sensor.manhattan_distance {
+                    // if we are inside the area where a sensor detected a 
+                    // beacon, jump to the next x coord outside
+                    let distance_y = (y - sensor.position.1).abs();
+                    let max_distance_x = sensor.manhattan_distance - distance_y;
+                    x = sensor.position.0 + max_distance_x;
+                    within_sensors = true;
+
+                    if x >= width {
+                        break;
+                    }
+                }
+            }
+
+            if within_sensors == false {
+                // found distress beacon!
+                println!("{}", x as u64 * 4_000_000 + y as u64);
+            }
+
+            x += 1;
+        }
+        y += 1;
+    }
 }
